@@ -122,7 +122,7 @@ def main():
     VERDICT_GENERAL = 'q'
     while True:
         try:
-            current_timestamp = 0
+            current_timestamp = int(time.time())
             response = get_api_answer(timestamp=current_timestamp)
             homework = check_response(response)
             for info in homework:
