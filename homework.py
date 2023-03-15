@@ -1,5 +1,7 @@
 import os
+import sys
 import logging
+from logging import StreamHandler, FileHandler
 import requests
 import telegram
 import time
@@ -11,11 +13,11 @@ load_dotenv()
 PRACTICUM_TOKEN = os.getenv('PRACTICUM_TOKEN')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
-
+tokens = (PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID)
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.DEBUG, filename='main.log', encoding='utf8')
-
+    level=logging.DEBUG, handlers=[FileHandler('main.log', encoding='utf8'),
+                                   StreamHandler(stream=sys.stdout)])
 RETRY_PERIOD = 600
 ENDPOINT = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
 HEADERS = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
@@ -31,12 +33,7 @@ HOMEWORK_VERDICTS = {
 def check_tokens():
     """Проверка наличия api ключей."""
     logging.info('Проверяем необходимые токены для работы приложения')
-    if PRACTICUM_TOKEN and TELEGRAM_TOKEN and TELEGRAM_CHAT_ID is not None:
-        return True
-    else:
-        logging.critical('Отсутствует необходимые'
-                         'токены для работы приложения')
-        return False
+    return all(tokens)
 
 
 def send_message(bot, message):
@@ -116,10 +113,11 @@ def main():
     if not check_tokens():
         logging.critical('Отсутствует необходимые'
                          'токены для работы приложения')
-        exit()
+        sys.exit('Отсутствует необходимые'
+                 'токены для работы приложения')
 
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
-    VERDICT_GENERAL = 'q'
+    VERDICT_GENERAL = None
     while True:
         try:
             current_timestamp = int(time.time())
