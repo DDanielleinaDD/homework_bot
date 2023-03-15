@@ -13,7 +13,7 @@ load_dotenv()
 PRACTICUM_TOKEN = os.getenv('PRACTICUM_TOKEN')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
-tokens = (PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID)
+
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.DEBUG, handlers=[FileHandler('main.log', encoding='utf8'),
@@ -33,7 +33,7 @@ HOMEWORK_VERDICTS = {
 def check_tokens():
     """Проверка наличия api ключей."""
     logging.info('Проверяем необходимые токены для работы приложения')
-    return all(tokens)
+    return all((PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID))
 
 
 def send_message(bot, message):
@@ -128,6 +128,8 @@ def main():
                 if message != VERDICT_GENERAL:
                     VERDICT_GENERAL = message
                     send_message(bot, message)
+                else:
+                    logging.info('Статус не изменился')
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
         time.sleep(RETRY_PERIOD)
